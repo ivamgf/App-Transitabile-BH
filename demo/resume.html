@@ -228,7 +228,29 @@
                 Valor: Carregando...<br><br>
             </div>
             <a href="search.html"></a>
-            <div class="col-md-3"><a href="javascript:showPaymentError()"><button type="button" class="btn btn-block btn-success">Estacionar</button></a></div>
+            <div class="col-md-3 container">
+              <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#myModal">Estacionar</button>
+            </div> 
+
+            <!-- Modal -->
+              <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-sm">
+                  <div class="modal-content" style="background-color: #4682B4">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title" style="color: white"><strong>Confirme</strong></h4>
+                    </div>
+                    <div class="modal-body">
+                      <p style="color: white">Você realmente deseja estacionar no local?</p>
+                    </div>
+                    <div class="modal-footer" style="padding-right: 32%">
+                      <button id="sim" type="button" class="btn btn-primary" data-dismiss="modal" onclick="showPaymentError()">Sim</button>
+                      <button id="nao" type="button" class="btn btn-primary" data-dismiss="modal">Não</button>
+                    </div>
+                  </div>
+                </div>
+              </div> 
+            <!-- Modal -->
         </div>
         <!-- /.box-body -->
         
@@ -268,6 +290,9 @@
 <!-- jQuery UI 1.11.4 -->
 <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+
+</script>
 <script>
   $.widget.bridge('uibutton', $.ui.button);
     var id,plate,model;

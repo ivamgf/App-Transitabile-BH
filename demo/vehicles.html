@@ -231,6 +231,17 @@
 		<form id="addVehicleForm">
 			<div class="box-body">
 
+        <div class="form-group">
+          <label>Selecione o tipo de veículo</label>
+            <select class="form-control" id="selTipo">
+              <option value="nd">-----</option>
+              <option value="automovel">Automóvel</option>
+              <option value="motocicleta">Motocicleta</option>
+              <option value="veiculo-de-carga">Veículos em operação de carga e descarga</option>
+              <option value="outros">outros</option>
+            </select>
+        </div>
+
 				<div class="form-group">
 					<label for="plateInput">Placa</label>
 					<input type="text" name="plateInput" class="form-control" id="plateInput" placeholder="Placa do veículo">

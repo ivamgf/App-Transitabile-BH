@@ -300,6 +300,7 @@
                     
                     
 <!--                    </tbody>-->
+
                 </table>
             </div>
             <!-- /.box-body -->
@@ -320,11 +321,54 @@
         <!-- right col -->
       </div>
       <!-- /.row (main row) -->
+ <!-- Main content -->
+    <section class="content">
+	
+      <div class="box">
+        <div class="box-header with-border">
+          <h3 class="box-title">Sua Localização</h3>
+
+          <div class="box-tools pull-right">            
+            
+          </div>
+        </div>
+        <div class="box-body">
+			<div id="locationInfo">
+				Definindo...			
+      </div>
+		</div>
+      </div>
+
+      <!-- Default box -->
+      <div class="box">
+        <div class="box-header with-border">
+          <!--<h3 class="box-title">Vagas Disponíveis</h3>-->
+
+          <div class="box-tools pull-right">
+            
+            
+          </div>
+		  
+		  
+        </div>
+        <div class="box-body">
+<div id="googleMap" style="width: 100%; height: 400px; position: relative; overflow: hidden;"><div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);"><div class="gm-err-container"><div class="gm-err-content"><div class="gm-err-icon"><img src="https://maps.gstatic.com/mapfiles/api-3/images/icon_error.png" draggable="false" style="user-select: none;"></div><div class="gm-err-title">Ops! Algo deu errado.</div><div class="gm-err-message">Esta página não carregou o Google Maps corretamente. Consulte o console JavaScript para ver detalhes técnicos.</div></div></div></div></div>
+</div>
+        <!-- /.box-body -->
+        <div class="box-footer">Google Maps</div>
+        <!-- /.box-footer-->
+      </div>
+      <!-- /.box -->
 
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  
   <footer class="main-footer" style="font-size:13px">
     <div class="pull-right hidden-xs">
       <b>Versão</b> 3.1.0
@@ -353,6 +397,115 @@
 <!-- jQuery UI 1.11.4 -->
 <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+
+
+<script>
+//    variaveis globais para o pin de localizacao do mapa
+var latAtual, lngAtual;
+var ruaAtual = "", areaAtual = "";
+var geocoder;
+
+function myMap() { 
+	var locations = [{
+//        lat: -22.958908, 
+        lat: latAtual, 
+//        lng: -46.538740, 
+        lng: lngAtual, 
+        amout: 152, 
+        value: "R$ 2,00", 
+//        loc: "Av.Antonio Pires Pimentel", 
+        loc: ruaAtual, 
+//        area: "central", 
+        area: areaAtual, 
+        h1: "8:00 ás 18:00h", 
+        h2: "8:00 ás 13:00h", 
+        d: "Liberado", 
+        p: "2:00h" 
+    }];
+    var map = new google.maps.Map(document.getElementById('googleMap'), {
+      zoom: 14,
+      center: new google.maps.LatLng(locations[0].lat, locations[0].lng),
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+    var infowindow = new google.maps.InfoWindow();
+    var marker, i;
+    for (i = 0; i < locations.length; i++) {  
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(locations[i].lat, locations[i].lng),
+		label: {
+//			text: locations[i].amout + "",
+			text: locations[i].loc + "",
+			color: 'black',
+			fontSize: "10px"
+		  },
+        map: map
+      });
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+			window.localStorage.setItem( "parklotSelected", JSON.stringify(locations[i]) );
+			infowindow.setContent(locations[i].loc + "<br>" + locations[i].value + "<br>" + "<a href='vehicles.html'><b>Estacionar</b></a>");
+			infowindow.open(map, marker);
+        }
+      })(marker, i));
+    }
+}    
+
+$(document).ready( function ( ) {
+	if (navigator.geolocation) {
+		geocoder = new google.maps.Geocoder();
+		navigator.geolocation.getCurrentPosition(codeLatLng);
+	} else {
+		$("#locationInfo").html( "Sua localização atual é:<br><br><b>Indefinido</b><br><br>" );
+	}
+});
+function onGeoLocError( error ) {
+	$("#locationInfo").html( "Sua localização atual é:<br><br><b>Não foi possivel definir, erro: " + error + "</b><br><br>" );
+}
+function codeLatLng( position ) {    
+	var lat = position.coords.latitude;
+	var lng = position.coords.longitude;    
+	var end = "";
+    var latlng = new google.maps.LatLng(lat, lng);
+    geocoder.geocode({'latLng': latlng}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {          
+//          atualiza variaveis do pin de localizacao
+        latAtual = position.coords.latitude;
+        lngAtual = position.coords.longitude;  
+        ruaAtual = results[0].address_components[1].short_name;
+        areaAtual = results[0].address_components[2].short_name;          
+        if (results[0]) {
+         //formatted address
+            end = results[0].formatted_address;
+        //find country name
+             for (var i=0; i<results[0].address_components.length; i++) {
+                for (var b=0;b<results[0].address_components[i].types.length;b++) {
+                //there are different types that might hold a city admin_area_lvl_1 usually does in come cases looking for sublocality type will be more appropriate
+                    if (results[0].address_components[i].types[b] == "administrative_area_level_1") {
+                        //this is the object you are looking for
+                        city= results[0].address_components[i];
+                        break;
+                    }
+                }
+             }
+        //city data
+        //end = end + "<br>" + city.short_name + "<br>" + city.long_name;
+        } else {
+			$("#locationInfo").html( "Sua localização atual é:<br><br><b>Indefinido</b><br><br>" );
+          alert("No results found");
+        }
+      } 
+       else {
+        var value = status;
+		    $("#locationInfo").html( '<b>Sua localização atual é:</b><br><br><input type="text" name="locationInput" class="form-control" id="locationInput" placeholder="Localização" value="' + value + '"/><br> <a href="vehicles.html"></a><br><br>' );
+      }
+        var value = end;
+        $("#locationInfo").html( '<b>Sua localização atual é:</b><br><br><input type="text" name="locationInput" class="form-control" id="locationInput" placeholder="Localização" value="' + value + '"/> <br><a href="vehicles.html"></a><br><br>' );        
+       
+        myMap();	  
+    });    
+  }
+</script>
+
 <script>
     
     
@@ -610,6 +763,6 @@
 <script src="dist/js/pages/dashboard.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="dist/js/demo.js"></script>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAdiyjWIoxGIyQ0F-b3YDrzXYwpPOaoIQ&amp;callback=myMap"></script>
 
 <div class="daterangepicker dropdown-menu ltr opensleft"><div class="calendar left"><div class="daterangepicker_input"><input class="input-mini form-control" type="text" name="daterangepicker_start" value=""><i class="fa fa-calendar glyphicon glyphicon-calendar"></i><div class="calendar-time" style="display: none;"><div></div><i class="fa fa-clock-o glyphicon glyphicon-time"></i></div></div><div class="calendar-table"></div></div><div class="calendar right"><div class="daterangepicker_input"><input class="input-mini form-control" type="text" name="daterangepicker_end" value=""><i class="fa fa-calendar glyphicon glyphicon-calendar"></i><div class="calendar-time" style="display: none;"><div></div><i class="fa fa-clock-o glyphicon glyphicon-time"></i></div></div><div class="calendar-table"></div></div><div class="ranges"><ul><li data-range-key="Today">Today</li><li data-range-key="Yesterday">Yesterday</li><li data-range-key="Last 7 Days">Last 7 Days</li><li data-range-key="Last 30 Days">Last 30 Days</li><li data-range-key="This Month">This Month</li><li data-range-key="Last Month">Last Month</li><li data-range-key="Custom Range">Custom Range</li></ul><div class="range_inputs"><button class="applyBtn btn btn-sm btn-success" disabled="disabled" type="button">Apply</button> <button class="cancelBtn btn btn-sm btn-default" type="button">Cancel</button></div></div></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div><div class="jvectormap-label"></div></body></html>
